@@ -76,6 +76,24 @@ title: Troubleshooting Flow Engine
                       x-text="flow.metadata?.title || flow._id"></h3>
                     <p class="text-sm text-slate-600 dark:text-slate-400 leading-relaxed"
                       x-text="flow.metadata?.description || 'No description provided.'"></p>
+                    <div class="flex items-center space-x-4 text-xs text-slate-500 dark:text-slate-400">
+                      <template x-if="flow.metadata?.author">
+                        <div class="flex items-center space-x-1">
+                          <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                          </svg>
+                          <span x-text="flow.metadata.author"></span>
+                        </div>
+                      </template>
+                      <template x-if="flow.metadata?.last_modified">
+                        <div class="flex items-center space-x-1">
+                          <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                          </svg>
+                          <span x-text="flow.metadata.last_modified"></span>
+                        </div>
+                      </template>
+                    </div>
                   </div>
                   <div
                     class="mt-6 pt-4 border-t border-slate-100 dark:border-slate-800/80 flex items-center justify-between">
@@ -113,6 +131,24 @@ title: Troubleshooting Flow Engine
             Diagnostic Run</span>
           <h2 class="text-2xl font-extrabold text-slate-950 dark:text-white" x-text="currentFlow.metadata.title"></h2>
           <p class="text-sm text-slate-600 dark:text-slate-400" x-text="currentFlow.metadata.description"></p>
+          <div class="flex flex-wrap gap-3 pt-2 text-xs font-medium text-slate-500 dark:text-slate-400">
+            <template x-if="currentFlow.metadata?.author">
+              <div class="flex items-center space-x-1">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                </svg>
+                <span x-text="`Author: ${currentFlow.metadata.author}`"></span>
+              </div>
+            </template>
+            <template x-if="currentFlow.metadata?.last_modified">
+              <div class="flex items-center space-x-1">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                </svg>
+                <span x-text="`Last Modified: ${currentFlow.metadata.last_modified}`"></span>
+              </div>
+            </template>
+          </div>
         </div>
         <div>
           <button @click="exitFlow()"
@@ -295,7 +331,7 @@ title: Troubleshooting Flow Engine
       // Inject site data parsed by Jekyll Collections
       flows: {
         {% for flow in site.flows %}
-    "{{ flow.slug }}": { { flow | jsonify } } {% unless forloop.last %}, {% endunless %}
+    "{{ flow.slug }}": {{ flow | jsonify }} {% unless forloop.last %}, {% endunless %}
     {% endfor %}
   },
   currentFlowId: null,

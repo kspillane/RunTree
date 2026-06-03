@@ -4,6 +4,8 @@ metadata:
   title: "Browser Showing Offline"
   description: "Diagnostic flow for when a Chromium-based browser shows offline while loading web pages."
   type: "Network Connectivity Issues"
+  author: "Admin"
+  last_modified: "2026-06-03"
 steps:
   start:
     title: "Check Physical Connection"
