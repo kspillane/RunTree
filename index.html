@@ -1,0 +1,393 @@
+---
+layout: default
+title: Troubleshooting Flow Engine
+---
+
+<div x-data="runTree()" x-init="init()" class="py-4 space-y-8" x-cloak>
+
+  <!-- ==================== FLOW DIRECTORY ==================== -->
+  <template x-if="!currentFlowId">
+    <div class="space-y-12">
+      <!-- Hero Header Section -->
+      <div class="relative overflow-hidden rounded-3xl bg-gradient-to-br from-slate-900 via-indigo-950 to-slate-900 dark:from-slate-950 dark:via-indigo-950 dark:to-slate-950 text-white p-8 sm:p-12 md:p-16 shadow-xl border border-indigo-500/10">
+        <div class="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(99,102,241,0.15),transparent_50%)]"></div>
+        <div class="relative z-10 max-w-3xl space-y-6">
+          <div class="inline-flex items-center space-x-2 px-3 py-1 rounded-full bg-indigo-500/10 border border-indigo-400/20 text-indigo-300 text-xs font-semibold uppercase tracking-wider">
+            <span>🚀 RunTree MVP v1.0</span>
+          </div>
+          <h1 class="text-4xl sm:text-5xl font-extrabold tracking-tight">
+            Runbooks Made <span class="bg-gradient-to-r from-indigo-400 to-violet-400 bg-clip-text text-transparent">Interactive</span>
+          </h1>
+          <p class="text-lg text-slate-300 leading-relaxed max-w-2xl">
+            RunTree generates interactive, step-by-step diagnostic decision trees from flat YAML configurations. Replace static wikis and empower your IT and Service Desk teams with structured troubleshooting flows.
+          </p>
+          <div class="flex flex-wrap gap-4 pt-2">
+            <a href="/docs" class="inline-flex items-center justify-center px-5 py-3 border border-transparent text-sm font-medium rounded-xl text-indigo-950 bg-white hover:bg-slate-100 transition-colors shadow-lg">
+              Learn How It Works
+            </a>
+            <a href="https://github.com" target="_blank" class="inline-flex items-center justify-center px-5 py-3 border border-slate-700 hover:border-slate-600 text-sm font-medium rounded-xl text-slate-300 bg-slate-800/40 hover:bg-slate-800/80 transition-colors">
+              GitHub Repository
+            </a>
+          </div>
+        </div>
+      </div>
+
+      <!-- Directory Grid -->
+      <div class="space-y-6">
+        <div class="flex items-center justify-between border-b border-slate-200 dark:border-slate-800 pb-4">
+          <h2 class="text-2xl font-bold tracking-tight text-slate-900 dark:text-slate-100">Available Troubleshooting Trees</h2>
+          <span class="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-widest px-2.5 py-1 rounded bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800" x-text="`${Object.keys(flows).length} Flow(s)`"></span>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <template x-for="(flow, flowId) in flows" :key="flowId">
+            <div class="group relative bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-6 shadow-sm hover:shadow-md hover:border-indigo-500/30 dark:hover:border-indigo-400/30 transition-all duration-200 flex flex-col justify-between">
+              <div class="space-y-3">
+                <div class="flex items-center justify-between">
+                  <div class="p-2 bg-indigo-50 dark:bg-indigo-950/50 rounded-xl text-indigo-600 dark:text-indigo-400 group-hover:scale-110 transition-transform">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
+                    </svg>
+                  </div>
+                  <span class="text-xs text-slate-400 dark:text-slate-500 font-mono" x-text="flowId"></span>
+                </div>
+                <h3 class="text-xl font-bold text-slate-950 dark:text-white group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors" x-text="flow.metadata.title || flowId"></h3>
+                <p class="text-sm text-slate-600 dark:text-slate-400 leading-relaxed" x-text="flow.metadata.description || 'No description provided.'"></p>
+              </div>
+              <div class="mt-6 pt-4 border-t border-slate-100 dark:border-slate-800/80 flex items-center justify-between">
+                <span class="text-xs font-medium text-indigo-600 dark:text-indigo-400 flex items-center space-x-1">
+                  <span x-text="`${Object.keys(flow.steps || {}).length} diagnostic steps`"></span>
+                </span>
+                <button 
+                  @click="selectFlow(flowId)"
+                  class="inline-flex items-center justify-center px-4 py-2 text-sm font-medium rounded-xl text-white bg-indigo-600 hover:bg-indigo-700 dark:bg-indigo-500 dark:hover:bg-indigo-600 transition-colors"
+                >
+                  Start Diagnostic
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 ml-1.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
+                  </svg>
+                </button>
+              </div>
+            </div>
+          </template>
+        </div>
+      </div>
+    </div>
+  </template>
+
+
+  <!-- ==================== INTERACTIVE STATE MACHINE ==================== -->
+  <template x-if="currentFlowId && currentStep">
+    <div class="space-y-6">
+      
+      <!-- Flow Header Bar -->
+      <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-4 sm:p-6 shadow-sm gap-4">
+        <div class="space-y-1">
+          <span class="text-xs font-semibold text-indigo-600 dark:text-indigo-400 uppercase tracking-widest">Active Diagnostic Run</span>
+          <h2 class="text-2xl font-extrabold text-slate-950 dark:text-white" x-text="currentFlow.metadata.title"></h2>
+          <p class="text-sm text-slate-600 dark:text-slate-400" x-text="currentFlow.metadata.description"></p>
+        </div>
+        <div>
+          <button 
+            @click="exitFlow()"
+            class="w-full sm:w-auto inline-flex items-center justify-center px-4 py-2 border border-slate-200 dark:border-slate-700 hover:border-slate-300 dark:hover:border-slate-600 text-sm font-medium rounded-xl text-slate-700 dark:text-slate-300 bg-white dark:bg-slate-900 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+            </svg>
+            Exit Runbook
+          </button>
+        </div>
+      </div>
+
+      <!-- Breadcrumbs Path -->
+      <div class="flex items-center overflow-x-auto py-2 bg-slate-100/50 dark:bg-slate-900/30 rounded-xl px-4 border border-slate-200/50 dark:border-slate-800/50 text-sm text-slate-500 dark:text-slate-400">
+        <div class="flex items-center space-x-2 shrink-0">
+          <button @click="exitFlow()" class="hover:text-indigo-600 dark:hover:text-indigo-400 font-medium">Flows</button>
+          <span class="text-slate-300 dark:text-slate-700">/</span>
+        </div>
+        <div class="flex items-center space-x-2 shrink-0 ml-2">
+          <span class="font-bold text-slate-700 dark:text-slate-300" x-text="currentFlow.metadata.title"></span>
+          <span class="text-slate-300 dark:text-slate-700">/</span>
+        </div>
+        <!-- Steps Breadcrumbs -->
+        <div class="flex items-center space-x-2 shrink-0 ml-2">
+          <template x-for="(stepId, index) in breadcrumbs" :key="stepId">
+            <div class="flex items-center space-x-2">
+              <button 
+                @click="goToBreadcrumb(stepId)"
+                class="hover:text-indigo-600 dark:hover:text-indigo-400 font-medium transition-colors"
+                :class="{ 'text-indigo-600 dark:text-indigo-400 font-semibold cursor-default pointer-events-none': stepId === currentStepId }"
+                x-text="getStepTitle(stepId)"
+              ></button>
+              <span class="text-slate-300 dark:text-slate-700" x-show="index < breadcrumbs.length - 1">/</span>
+            </div>
+          </template>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
+        
+        <!-- Main Decision Card -->
+        <div class="lg:col-span-2 space-y-6">
+          <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 sm:p-8 shadow-sm flex flex-col justify-between min-h-[300px]">
+            
+            <div class="space-y-6">
+              <!-- Card Header -->
+              <div class="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-4">
+                <div class="flex items-center space-x-3">
+                  <div class="h-3 w-3 rounded-full bg-indigo-600 dark:bg-indigo-500 animate-pulse"></div>
+                  <span class="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-widest">Current Instruction Step</span>
+                </div>
+                <span class="text-xs font-mono text-slate-400 dark:text-slate-500" x-text="`ID: ${currentStepId}`"></span>
+              </div>
+
+              <!-- Step Content -->
+              <div class="space-y-4">
+                <h3 class="text-2xl sm:text-3xl font-extrabold text-slate-950 dark:text-white" x-text="currentStep.title"></h3>
+                <div class="text-base sm:text-lg text-slate-700 dark:text-slate-300 leading-relaxed font-normal bg-slate-50 dark:bg-slate-950 p-5 rounded-2xl border border-slate-100 dark:border-slate-900" x-html="formatBody(currentStep.body)">
+                </div>
+              </div>
+            </div>
+
+            <!-- Decision Options Buttons -->
+            <div class="mt-8 pt-6 border-t border-slate-100 dark:border-slate-800/80">
+              <h4 class="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-4">Choose an option to proceed:</h4>
+              
+              <div class="flex flex-wrap gap-4">
+                <!-- If options is empty, show default resolved actions or restart -->
+                <template x-if="!currentStep.options || currentStep.options.length === 0">
+                  <div class="w-full flex flex-col sm:flex-row items-center justify-between bg-slate-50 dark:bg-slate-950 p-4 rounded-xl border border-slate-200/50 dark:border-slate-800/50 gap-4">
+                    <span class="text-sm text-slate-500 dark:text-slate-400 flex items-center">
+                      <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1.5 text-emerald-500" viewBox="0 0 20 20" fill="currentColor">
+                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
+                      </svg>
+                      This troubleshooting path has completed.
+                    </span>
+                    <button 
+                      @click="selectStep('start')"
+                      class="w-full sm:w-auto inline-flex items-center justify-center px-4 py-2 border border-transparent text-sm font-medium rounded-xl text-white bg-indigo-600 hover:bg-indigo-700 dark:bg-indigo-500 dark:hover:bg-indigo-600 transition-colors shadow-sm"
+                    >
+                      <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 1121.21 8H18.2" />
+                      </svg>
+                      Restart Diagnostic
+                    </button>
+                  </div>
+                </template>
+
+                <!-- Custom Options Loop -->
+                <template x-for="(option, idx) in currentStep.options" :key="idx">
+                  <div class="w-full sm:w-auto">
+                    <!-- Option targets another step -->
+                    <template x-if="option.target">
+                      <button 
+                        @click="selectStep(option.target)"
+                        :class="getOptionClasses(option.type)"
+                        type="button"
+                      >
+                        <span x-text="option.label"></span>
+                      </button>
+                    </template>
+                    
+                    <!-- Option links to an external URL -->
+                    <template x-if="option.url">
+                      <a 
+                        :href="option.url" 
+                        target="_blank" 
+                        rel="noopener noreferrer" 
+                        :class="getOptionClasses(option.type)"
+                      >
+                        <span x-text="option.label"></span>
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 ml-1.5 stroke-[2.5px]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path stroke-linecap="round" stroke-linejoin="round" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                        </svg>
+                      </a>
+                    </template>
+                  </div>
+                </template>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+        <!-- Sidebar Diagnostics Path Log -->
+        <div class="space-y-6">
+          <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 shadow-sm space-y-4">
+            <h4 class="text-sm font-bold text-slate-900 dark:text-slate-100 uppercase tracking-widest border-b border-slate-100 dark:border-slate-800 pb-3 flex items-center">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1.5 text-indigo-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+              </svg>
+              Run History Log
+            </h4>
+            
+            <div class="relative pl-4 space-y-6 border-l-2 border-slate-200 dark:border-slate-800 ml-2">
+              <template x-for="(stepId, idx) in breadcrumbs" :key="stepId">
+                <div class="relative group">
+                  <!-- Bullet marker -->
+                  <div 
+                    class="absolute -left-[23px] top-1.5 h-4 w-4 rounded-full border-2 bg-white dark:bg-slate-950 transition-colors"
+                    :class="{ 
+                      'border-indigo-600 dark:border-indigo-500 bg-indigo-600 dark:bg-indigo-500 ring-4 ring-indigo-500/20': stepId === currentStepId,
+                      'border-slate-300 dark:border-slate-700': stepId !== currentStepId
+                    }"
+                  ></div>
+                  <div class="space-y-1">
+                    <button 
+                      @click="goToBreadcrumb(stepId)"
+                      class="text-xs font-semibold text-slate-400 uppercase tracking-wide hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors text-left"
+                      x-text="`Step ${idx + 1}: ${stepId}`"
+                    ></button>
+                    <p 
+                      class="text-sm font-bold leading-tight" 
+                      :class="{ 'text-indigo-600 dark:text-indigo-400': stepId === currentStepId, 'text-slate-700 dark:text-slate-300': stepId !== currentStepId }"
+                      x-text="getStepTitle(stepId)"
+                    ></p>
+                  </div>
+                </div>
+              </template>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+  </template>
+
+</div>
+
+<script>
+  function runTree() {
+    return {
+      // Inject site data parsed by Jekyll
+      flows: {{ site.data.flows | jsonify }} || {},
+      currentFlowId: null,
+      currentStepId: null,
+      breadcrumbs: [],
+
+      init() {
+        this.loadStateFromUrl();
+        window.addEventListener('popstate', () => {
+          this.loadStateFromUrl();
+        });
+      },
+
+      loadStateFromUrl() {
+        const params = new URLSearchParams(window.location.search);
+        const flow = params.get('flow');
+        const step = params.get('step');
+
+        if (flow && this.flows[flow]) {
+          this.currentFlowId = flow;
+          const targetStep = (step && this.flows[flow].steps[step]) ? step : 'start';
+          this.currentStepId = targetStep;
+
+          // Rebuild breadcrumbs list
+          const idx = this.breadcrumbs.indexOf(targetStep);
+          if (idx !== -1) {
+            this.breadcrumbs = this.breadcrumbs.slice(0, idx + 1);
+          } else {
+            // Path reconstruct approximation
+            if (targetStep === 'start') {
+              this.breadcrumbs = ['start'];
+            } else {
+              this.breadcrumbs = ['start', targetStep];
+            }
+          }
+        } else {
+          this.currentFlowId = null;
+          this.currentStepId = null;
+          this.breadcrumbs = [];
+        }
+      },
+
+      updateUrl() {
+        const url = new URL(window.location);
+        if (this.currentFlowId && this.currentStepId) {
+          url.searchParams.set('flow', this.currentFlowId);
+          url.searchParams.set('step', this.currentStepId);
+        } else {
+          url.searchParams.delete('flow');
+          url.searchParams.delete('step');
+        }
+        window.history.pushState({}, '', url.toString());
+      },
+
+      selectFlow(flowId) {
+        if (this.flows[flowId]) {
+          this.currentFlowId = flowId;
+          this.currentStepId = 'start';
+          this.breadcrumbs = ['start'];
+          this.updateUrl();
+        }
+      },
+
+      selectStep(stepId) {
+        if (this.currentFlowId && this.flows[this.currentFlowId].steps[stepId]) {
+          this.currentStepId = stepId;
+          
+          const idx = this.breadcrumbs.indexOf(stepId);
+          if (idx !== -1) {
+            this.breadcrumbs = this.breadcrumbs.slice(0, idx + 1);
+          } else {
+            this.breadcrumbs.push(stepId);
+          }
+          this.updateUrl();
+          
+          // Scroll page back to top for fluid transitions
+          window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+      },
+
+      goToBreadcrumb(stepId) {
+        this.selectStep(stepId);
+      },
+
+      exitFlow() {
+        this.currentFlowId = null;
+        this.currentStepId = null;
+        this.breadcrumbs = [];
+        this.updateUrl();
+      },
+
+      get currentFlow() {
+        return this.currentFlowId ? this.flows[this.currentFlowId] : null;
+      },
+
+      get currentStep() {
+        return (this.currentFlow && this.currentStepId) ? this.currentFlow.steps[this.currentStepId] : null;
+      },
+
+      getStepTitle(stepId) {
+        return this.currentFlow?.steps[stepId]?.title || stepId;
+      },
+
+      formatBody(text) {
+        if (!text) return '';
+        // Simple regex to parse bold text **bold** -> <strong>bold</strong>
+        let formatted = text.replace(/\*\*(.*?)\*\*/g, '<strong class="font-bold text-slate-900 dark:text-white">$1</strong>');
+        // Simple regex to parse internal/external links [Label](URL) -> <a class="..." href="URL">Label</a>
+        formatted = formatted.replace(/\[(.*?)\]\((.*?)\)/g, '<a href="$2" target="_blank" rel="noopener noreferrer" class="text-indigo-600 dark:text-indigo-400 underline font-medium hover:text-indigo-800 dark:hover:text-indigo-300">$1</a>');
+        // Replace newlines with line breaks
+        return formatted.replace(/\n/g, '<br>');
+      },
+
+      getOptionClasses(type) {
+        const base = "w-full sm:w-auto inline-flex items-center justify-center px-6 py-3 border text-base font-semibold rounded-xl shadow-sm focus:outline-none focus:ring-2 focus:ring-offset-2 transition-all duration-150 transform hover:-translate-y-0.5 cursor-pointer dark:focus:ring-offset-slate-950 ";
+        
+        if (type === 'primary') {
+          return base + "border-transparent text-white bg-indigo-600 hover:bg-indigo-700 dark:bg-indigo-500 dark:hover:bg-indigo-600 focus:ring-indigo-500";
+        } else if (type === 'success') {
+          return base + "border-transparent text-white bg-emerald-600 hover:bg-emerald-700 dark:bg-emerald-500 dark:hover:bg-emerald-600 focus:ring-emerald-500";
+        } else if (type === 'danger') {
+          return base + "border-transparent text-white bg-rose-600 hover:bg-rose-700 dark:bg-rose-500 dark:hover:bg-rose-600 focus:ring-rose-500";
+        } else if (type === 'help') {
+          return base + "border-slate-300 dark:border-slate-700 text-slate-700 dark:text-slate-300 bg-white hover:bg-slate-50 dark:bg-slate-900 dark:hover:bg-slate-800 focus:ring-slate-500";
+        }
+        return base + "border-transparent text-white bg-slate-600 hover:bg-slate-700 dark:bg-slate-500 dark:hover:bg-slate-600 focus:ring-slate-500";
+      }
+    }
+  }
+</script>

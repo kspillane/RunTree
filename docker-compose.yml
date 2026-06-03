@@ -1,0 +1,14 @@
+version: '3.8'
+
+services:
+  runtree:
+    image: jekyll/jekyll:4.2.2
+    container_name: runtree-jekyll
+    command: jekyll serve --livereload --host 0.0.0.0 --force_polling
+    ports:
+      - "4000:4000"
+      - "35729:35729"
+    volumes:
+      - .:/srv/jekyll
+    environment:
+      - JEKYLL_ENV=development

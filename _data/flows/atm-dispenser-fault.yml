@@ -1,0 +1,33 @@
+metadata:
+  id: "atm-dispenser-fault"
+  title: "ATM Dispenser Fault"
+  description: "Diagnostic flow for cash dispenser hardware errors."
+steps:
+  start:
+    title: "Verify Error State"
+    body: "Check the ATM monitoring dashboard."
+    options:
+      - label: "Shows Bill Jam"
+        target: "check_physical_jam"
+        type: "primary"
+      - label: "View KCS Article"
+        url: "https://kb.internal/123"
+        type: "help"
+  check_physical_jam:
+    title: "Check for Physical Jam"
+    body: "Open the vault and check the transport path."
+    options:
+      - label: "Jam Cleared"
+        target: "resolved"
+        type: "success"
+      - label: "No Jam"
+        target: "dispatch_vendor"
+        type: "danger"
+  resolved:
+    title: "Resolved"
+    body: "Document steps and close ticket."
+    options: []
+  dispatch_vendor:
+    title: "Dispatch Vendor"
+    body: "Open a ticket with the hardware vendor."
+    options: []
