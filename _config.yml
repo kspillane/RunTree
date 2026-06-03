@@ -1,5 +1,7 @@
 title: RunTree
 description: "Interactive troubleshooting decision trees from YAML."
+url: "https://kspillane.github.io"
+baseurl: "/RunTree"
 theme: null
 exclude:
   - docker-compose.yml

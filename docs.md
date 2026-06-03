@@ -4,7 +4,7 @@ title: Documentation
 permalink: /docs
 ---
 
-<div class="prose max-w-3xl mx-auto py-4">
+<div class="prose max-w-3xl mx-auto py-4" markdown="1">
 
 # RunTree Documentation
 
