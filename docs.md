@@ -21,39 +21,42 @@ RunTree uses a **flat state-machine layout**. Instead of nesting steps inside on
 Here is a complete, copy-pasteable example file:
 
 ```yaml
+---
 metadata:
-  id: "atm-dispenser-fault"
-  title: "ATM Dispenser Fault"
-  description: "Diagnostic flow for cash dispenser hardware errors."
+  id: "browser-offline"
+  title: "Browser Showing Offline"
+  description: "Diagnostic flow for when a browser shows offline."
+  type: "Network Connectivity Issues"
 steps:
   start:
-    title: "Verify Error State"
-    body: "Check the ATM monitoring dashboard."
+    title: "Check Physical Connection"
+    body: "Check the network cable."
     options:
-      - label: "Shows Bill Jam"
-        target: "check_physical_jam"
+      - label: "Connected properly"
+        target: "check_ip"
         type: "primary"
-      - label: "View KCS Article"
-        url: "https://kb.internal/123"
-        type: "help"
-  check_physical_jam:
-    title: "Check for Physical Jam"
-    body: "Open the vault and check the transport path."
+      - label: "Not connected"
+        target: "fix_physical"
+        type: "danger"
+  check_ip:
+    title: "Check IP"
+    body: "Run ipconfig."
     options:
-      - label: "Jam Cleared"
+      - label: "Valid IP"
         target: "resolved"
         type: "success"
-      - label: "No Jam"
-        target: "dispatch_vendor"
-        type: "danger"
+  fix_physical:
+    title: "Plug it in"
+    body: "Plug in the cable."
+    options:
+      - label: "Done"
+        target: "resolved"
+        type: "success"
   resolved:
     title: "Resolved"
     body: "Document steps and close ticket."
     options: []
-  dispatch_vendor:
-    title: "Dispatch Vendor"
-    body: "Open a ticket with the hardware vendor."
-    options: []
+---
 ```
 
 ---
@@ -86,20 +89,28 @@ Options within a step allow user interaction. Each option MUST have either a `ta
 * `target` *(String)*: The key/ID of another step to navigate to (e.g., `check_physical_jam`).
 * `url` *(String)*: An external link (e.g., KCS knowledge base, monitoring console). If specified, clicking the button will open this URL in a new browser tab.
 * `type` *(String)*: Sets the button style. Available types:
-  * `primary` - Blue background (standard actions).
+  * `primary` - Blue/Indigo background (standard actions).
   * `success` - Green background (resolutions/clearing checks).
   * `danger` - Red background (escalations/error pathways).
   * `help` - Outlined styling with an external link indicator.
+
+<div class="not-prose my-6 grid grid-cols-2 gap-4">
+  <button class="w-full inline-flex items-center justify-center px-6 py-3 border border-transparent text-base font-semibold rounded-xl text-white bg-indigo-600 shadow-sm">primary</button>
+  <button class="w-full inline-flex items-center justify-center px-6 py-3 border border-transparent text-base font-semibold rounded-xl text-white bg-emerald-600 shadow-sm">success</button>
+  <button class="w-full inline-flex items-center justify-center px-6 py-3 border border-transparent text-base font-semibold rounded-xl text-white bg-rose-600 shadow-sm">danger</button>
+  <button class="w-full inline-flex items-center justify-center px-6 py-3 border border-slate-300 text-base font-semibold rounded-xl text-slate-700 bg-white shadow-sm">help</button>
+</div>
 
 ---
 
 ## Authoring Guide for New Flows
 
-1. Create a new `.yml` file in the `_data/flows/` directory (e.g., `_data/flows/database-cpu-alert.yml`).
-2. Add your `metadata` details at the top.
-3. Map out your decision nodes. Sketch the flowchart beforehand to identify the step keys.
+1. Create a new `.md` file in the `_flows/` directory (e.g., `_flows/database-cpu-alert.md`).
+2. Add your YAML front matter (`---`) with `metadata` details at the top. Be sure to include a `type` string to group the flow appropriately on the homepage.
+3. Map out your decision nodes under the `steps:` block. Sketch the flowchart beforehand to identify the step keys.
 4. Ensure the entry point is named `start`.
 5. Connect your nodes by linking options with their corresponding `target` ID.
-6. Verify your changes. Since Jekyll runs in a development container, saving the YAML file will immediately compile and display the new runbook on your dashboard.
+6. Close your front matter with `---`.
+7. Verify your changes. Since Jekyll runs in a development container, saving the file will immediately compile and display the new runbook on your dashboard.
 
 </div>
