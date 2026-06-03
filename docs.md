@@ -61,13 +61,17 @@ steps:
 ## Field Specifications
 
 ### 1. Metadata Block
+
 The top-level `metadata` block registers the flow:
+
 * `id` *(String, Required)*: The unique URL slug for this flow (e.g. `atm-dispenser-fault`).
 * `title` *(String, Required)*: The human-readable name of the runbook.
 * `description` *(String, Optional)*: A short summary of what this diagnostic flow solves.
 
 ### 2. Steps Block
-The `steps` map contains all nodes. 
+
+The `steps` map contains all nodes.
+
 * Every flow **must** have a step key named `start`. This is the entry point when a user opens the runbook.
 * Each step has:
   * `title` *(String)*: Title of the step.
@@ -75,7 +79,9 @@ The `steps` map contains all nodes.
   * `options` *(Array)*: Branching buttons for the user to select.
 
 ### 3. Option Configuration
+
 Options within a step allow user interaction. Each option MUST have either a `target` OR a `url`:
+
 * `label` *(String)*: The text displayed on the button.
 * `target` *(String)*: The key/ID of another step to navigate to (e.g., `check_physical_jam`).
 * `url` *(String)*: An external link (e.g., KCS knowledge base, monitoring console). If specified, clicking the button will open this URL in a new browser tab.
