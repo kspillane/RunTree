@@ -3,6 +3,9 @@ description: "Interactive troubleshooting decision trees from YAML."
 url: "https://kspillane.github.io"
 baseurl: "/RunTree"
 theme: null
+collections:
+  flows:
+    output: false
 exclude:
   - docker-compose.yml
   - Gemfile
