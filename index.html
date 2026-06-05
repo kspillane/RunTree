@@ -331,9 +331,12 @@ title: Troubleshooting Flow Engine
       // Inject site data parsed by Jekyll Collections
       flows: {
         {% for flow in site.flows %}
-    "{{ flow.slug }}": {{ flow | jsonify }} {% unless forloop.last %}, {% endunless %}
-    {% endfor %}
-  },
+        "{{ flow.metadata.id }}": {
+          "metadata": {{ flow.metadata | jsonify }},
+          "steps": {{ flow.steps | jsonify }}
+        }{% unless forloop.last %},{% endunless %}
+        {% endfor %}
+      },
   currentFlowId: null,
     currentStepId: null,
       breadcrumbs: [],
